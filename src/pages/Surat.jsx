@@ -70,14 +70,12 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
         </button>
       </div>
 
-      {/* Info Deskripsi Surat */}
       <div className="p-4">
         <div className="bg-emerald-50 rounded-2xl p-4 mb-6 border border-emerald-100">
            <p className="text-[11px] text-emerald-800 leading-relaxed italic" 
               dangerouslySetInnerHTML={{ __html: surat.deskripsi }} />
         </div>
 
-        {/* List Ayat */}
         <div className="space-y-4">
           {surat.ayat.map((ayat) => (
             <div key={ayat.nomorAyat} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
@@ -111,33 +109,34 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
         </div>
       </div>
 
+      {/* Navigasi Antar Surat */}
       <div className="px-4 pb-10 flex gap-3 mt-8">
-  {surat.suratSebelumnya ? (
-    <button 
-      onClick={() => onNavigate(surat.suratSebelumnya.nomor)}
-      className="flex-1 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center justify-center gap-2 text-slate-700 font-bold active:scale-95 transition-transform"
-    >
-      <ChevronLeft className="w-5 h-5" /> 
-      <div className="text-left">
-        <p className="text-[10px] text-slate-400 font-medium leading-none mb-1">Sebelumnya</p>
-        <p className="text-sm">{surat.suratSebelumnya.namaLatin}</p>
-      </div>
-    </button>
-  ) : <div className="flex-1" />}
+        {surat.suratSebelumnya ? (
+          <button 
+            onClick={() => onNavigate(surat.suratSebelumnya.nomor)}
+            className="flex-1 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center justify-center gap-2 text-slate-700 font-bold active:scale-95 transition-transform"
+          >
+            <ChevronLeft className="w-5 h-5" /> 
+            <div className="text-left">
+              <p className="text-[10px] text-slate-400 font-medium leading-none mb-1">Sebelumnya</p>
+              <p className="text-sm">{surat.suratSebelumnya.namaLatin}</p>
+            </div>
+          </button>
+        ) : <div className="flex-1" />}
 
-  {surat.suratSelanjutnya ? (
-    <button 
-      onClick={() => onNavigate(surat.suratSelanjutnya.nomor)}
-      className="flex-1 bg-emerald-600 p-4 rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-white font-bold active:scale-95 transition-transform"
-    >
-      <div className="text-right">
-        <p className="text-[10px] text-emerald-200 font-medium leading-none mb-1">Selanjutnya</p>
-        <p className="text-sm">{surat.suratSelanjutnya.namaLatin}</p>
+        {surat.suratSelanjutnya ? (
+          <button 
+            onClick={() => onNavigate(surat.suratSelanjutnya.nomor)}
+            className="flex-1 bg-emerald-600 p-4 rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-white font-bold active:scale-95 transition-transform"
+          >
+            <div className="text-right">
+              <p className="text-[10px] text-emerald-200 font-medium leading-none mb-1">Selanjutnya</p>
+              <p className="text-sm">{surat.suratSelanjutnya.namaLatin}</p>
+            </div>
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        ) : <div className="flex-1" />}
       </div>
-      <ChevronRight className="w-5 h-5" />
-    </button>
-  ) : <div className="flex-1" />}
-</div>
     </div>
   );
 };
@@ -148,7 +147,24 @@ export default function SuratView() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNomor, setSelectedNomor] = useState(null);
+    
+  // 1. Perbaikan: Cek localStorage untuk ID surat yang dipasing dari tab Tafsir
+  useEffect(() => {
+    const checkOpenSurat = () => {
+      const openId = localStorage.getItem('open_surat_id');
+      if (openId) {
+        setSelectedNomor(parseInt(openId));
+        localStorage.removeItem('open_surat_id'); // Bersihkan agar tidak terbuka otomatis lagi
+      }
+    };
 
+    checkOpenSurat();
+    // Tambahkan event listener untuk memantau perubahan tab jika perlu
+    window.addEventListener('storage', checkOpenSurat);
+    return () => window.removeEventListener('storage', checkOpenSurat);
+  }, []);
+
+  // 2. Fetch daftar surat
   useEffect(() => {
     const fetchSurat = async () => {
       try {
@@ -187,7 +203,6 @@ export default function SuratView() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* HEADER & SEARCH BAR - Disamakan dengan Doa.jsx */}
       <header className="sticky top-0 z-50 bg-slate-50">
         <div className="bg-emerald-600 pt-8 pb-10 px-5 shadow-lg rounded-b-[2.5rem]">
           <h2 className="text-white text-2xl font-bold mb-4">Al-Qur'an</h2>
@@ -204,7 +219,6 @@ export default function SuratView() {
         </div>
       </header>
 
-      {/* LIST CONTENT */}
       <main className="flex-1 p-4 -mt-4 pb-24">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">

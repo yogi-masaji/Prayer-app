@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Book, BookOpen } from 'lucide-react';
+import { Home, Book, BookOpen, SearchIcon } from 'lucide-react';
 
 // Import komponen-komponen yang sudah dipisah
 import HomeView from './pages/Home';
 import DoaView from './pages/Doa';
 import SuratView from './pages/Surat';
+import TafsirView from './pages/Tafsir';
 
 // --- Custom Hooks ---
 const useSavedLocation = () => {
@@ -30,7 +31,10 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState('home');
   const [selectedSurat, setSelectedSurat] = useState(null);
   const { location, saveLocation, isLoaded } = useSavedLocation();
-
+const handleNavigateToSurat = (nomor) => {
+  setCurrentTab('surat'); 
+  setSelectedSurat(nomor); 
+};
   return (
   
     <div className="max-w-md mx-auto h-[100dvh] bg-slate-50 flex flex-col font-sans shadow-2xl relative sm:border-x sm:border-slate-200 overflow-hidden">
@@ -43,7 +47,15 @@ export default function App() {
         {currentTab === 'doa' && <DoaView />}
         
         {currentTab === 'surat' && (
-  <SuratView />
+<SuratView />
+)}
+
+
+{currentTab === 'tafsir' && (
+  <TafsirView onNavigateToSurat={(no) => {
+    setCurrentTab('surat');
+    localStorage.setItem('open_surat_id', no);
+  }} />
 )}
       </div>
 
@@ -65,6 +77,7 @@ export default function App() {
               if(currentTab !== 'surat') setSelectedSurat(null);
             }} 
           />
+          <NavItem icon={<SearchIcon />} label="Tafsir" active={currentTab === 'tafsir'} onClick={() => setCurrentTab('tafsir')} />
         </div>
       </div>
 
