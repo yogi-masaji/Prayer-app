@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400..700&display=swap');
+@import "tailwindcss";
+
+body {
+  background-color: #f8fafc; /* bg-slate-50 */
+}
+
+.font-arab-uploaded {
+  font-family: 'Noto Naskh Arabic', serif;
+}
