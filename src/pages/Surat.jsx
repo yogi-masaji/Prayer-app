@@ -6,6 +6,10 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
   const [surat, setSurat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [playingAyat, setPlayingAyat] = useState(null);
+  
+  // State untuk Slider Audio
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +27,14 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
     };
     fetchDetail();
     window.scrollTo(0, 0);
+
+    // CLEANUP: Berhenti saat komponen di-unmount (pindah tab/halaman)
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, [nomor]);
 
   const togglePlay = (url, id) => {
@@ -30,12 +42,50 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
       audioRef.current.pause();
       setPlayingAyat(null);
     } else {
-      if (audioRef.current) audioRef.current.pause();
-      audioRef.current = new Audio(url);
-      audioRef.current.play();
+      // Hentikan audio yang sedang jalan jika ada
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(url);
+      audioRef.current = audio;
+
+      // Event: Update durasi total
+      audio.onloadedmetadata = () => {
+        setDuration(audio.duration);
+      };
+
+      // Event: Update progress detik demi detik
+      audio.ontimeupdate = () => {
+        setProgress(audio.currentTime);
+      };
+
+      // Event: Selesai putar
+      audio.onended = () => {
+        setPlayingAyat(null);
+        setProgress(0);
+      };
+
+      audio.play();
       setPlayingAyat(id);
-      audioRef.current.onended = () => setPlayingAyat(null);
     }
+  };
+
+  // Fungsi geser slider manual
+  const handleSliderChange = (e) => {
+    const time = Number(e.target.value);
+    setProgress(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
+  };
+
+  // Helper format waktu (00:00)
+  const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (loading) {
@@ -50,24 +100,44 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
   return (
     <div className="animate-in fade-in slide-in-from-right duration-300 pb-32">
       {/* Header Detail Sticky */}
-      <div className="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-4 py-4 border-b border-slate-100 flex items-center justify-between">
-        <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-          <ArrowLeft className="w-6 h-6 text-slate-700" />
-        </button>
-        <div className="text-center">
-          <h2 className="font-bold text-slate-800">{surat.namaLatin}</h2>
-          <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">{surat.arti}</p>
+      <div className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
+        <div className="px-4 py-4 flex items-center justify-between">
+            <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <ArrowLeft className="w-6 h-6 text-slate-700" />
+            </button>
+            <div className="text-center">
+            <h2 className="font-bold text-slate-800">{surat.namaLatin}</h2>
+            <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">{surat.arti}</p>
+            </div>
+            <button 
+            onClick={() => togglePlay(surat.audioFull["01"], 'full')}
+            className={`p-2.5 rounded-full transition-all ${
+                playingAyat === 'full' 
+                ? 'bg-amber-500 text-white shadow-lg shadow-amber-200 animate-pulse' 
+                : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+            }`}
+            >
+            {playingAyat === 'full' ? <Pause className="w-5 h-5" /> : <Music className="w-5 h-5" />}
+            </button>
         </div>
-        <button 
-          onClick={() => togglePlay(surat.audioFull["01"], 'full')}
-          className={`p-2.5 rounded-full transition-all ${
-            playingAyat === 'full' 
-              ? 'bg-amber-500 text-white shadow-lg shadow-amber-200 animate-pulse' 
-              : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
-          }`}
-        >
-          {playingAyat === 'full' ? <Pause className="w-5 h-5" /> : <Music className="w-5 h-5" />}
-        </button>
+
+        {/* Floating Player Slider (Hanya muncul jika ada audio play) */}
+        {playingAyat && (
+            <div className="px-6 pb-3 animate-in fade-in slide-in-from-top duration-300">
+                <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-mono text-slate-400 w-8">{formatTime(progress)}</span>
+                    <input 
+                        type="range"
+                        min="0"
+                        max={duration || 0}
+                        value={progress}
+                        onChange={handleSliderChange}
+                        className="flex-1 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                    />
+                    <span className="text-[10px] font-mono text-slate-400 w-8">{formatTime(duration)}</span>
+                </div>
+            </div>
+        )}
       </div>
 
       <div className="p-4">
@@ -148,23 +218,20 @@ export default function SuratView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNomor, setSelectedNomor] = useState(null);
     
-  // 1. Perbaikan: Cek localStorage untuk ID surat yang dipasing dari tab Tafsir
   useEffect(() => {
     const checkOpenSurat = () => {
       const openId = localStorage.getItem('open_surat_id');
       if (openId) {
         setSelectedNomor(parseInt(openId));
-        localStorage.removeItem('open_surat_id'); // Bersihkan agar tidak terbuka otomatis lagi
+        localStorage.removeItem('open_surat_id'); 
       }
     };
 
     checkOpenSurat();
-    // Tambahkan event listener untuk memantau perubahan tab jika perlu
     window.addEventListener('storage', checkOpenSurat);
     return () => window.removeEventListener('storage', checkOpenSurat);
   }, []);
 
-  // 2. Fetch daftar surat
   useEffect(() => {
     const fetchSurat = async () => {
       try {

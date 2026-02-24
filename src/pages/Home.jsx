@@ -87,7 +87,14 @@ export default function HomeView({ location, saveLocation }) {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('daily');
+    const today = new Date();
 
+const formattedDate = today.toLocaleDateString("id-ID", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+})
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -165,6 +172,7 @@ export default function HomeView({ location, saveLocation }) {
             <Edit2 className="w-3 h-3 ml-1 opacity-70" />
           </button>
           <div className="text-right">
+            <p className="text-xs opacity-75">{formattedDate}</p>
             <p className="text-sm font-medium opacity-90">Ramadhan 1447 H</p>
             <p className="text-xs opacity-75">Hari ke-{currentDayNum}</p>
           </div>
