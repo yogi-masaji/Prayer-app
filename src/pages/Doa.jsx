@@ -89,7 +89,6 @@ export default function DoaView() {
       try {
         const res = await fetch('https://equran.id/api/doa');
         const json = await res.json();
-        // Sesuai struktur data: { status: "success", data: [...] }
         setDoaList(json.data || []);
       } catch (err) {
         console.error("Gagal mengambil data doa", err);
@@ -110,7 +109,6 @@ export default function DoaView() {
     });
   }, [doaList, searchQuery]);
 
-  // Jika ada ID terpilih, tampilkan detail
   if (selectedId) {
     return (
       <div className="p-4 pb-24 bg-slate-50 min-h-screen">
@@ -120,56 +118,60 @@ export default function DoaView() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
-      {/* Header & Search */}
-      <div className="bg-emerald-600 pt-8 pb-6 px-5 sticky top-0 z-20 shadow-lg rounded-b-[2rem]">
-        <h2 className="text-white text-2xl font-bold mb-4">Kumpulan Doa</h2>
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Cari doa (cth: tidur, makan)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white text-slate-800 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-emerald-400 shadow-inner"
-          />
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* HEADER & SEARCH BAR - Tetap di atas saat scroll */}
+      <header className="sticky top-0 z-50 bg-slate-50">
+        <div className="bg-emerald-600 pt-8 pb-10 px-5 shadow-lg rounded-b-[2.5rem]">
+          <h2 className="text-white text-2xl font-bold mb-4">Kumpulan Doa</h2>
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Cari doa (cth: tidur, makan)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white text-slate-800 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-400/30 shadow-xl transition-all"
+            />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* List Card Doa */}
-      <div className="p-4 space-y-3">
+      {/* LIST CONTENT - Scrollable area */}
+      <main className="flex-1 p-4 -mt-4 pb-24">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-emerald-600 mb-2" />
-            <p className="text-slate-400 text-sm">Loading...</p>
+            <p className="text-slate-400 text-sm font-medium">Memuat data...</p>
           </div>
         ) : filteredDoa.length > 0 ? (
-          filteredDoa.map((doa) => (
-            <button
-              key={doa.id}
-              onClick={() => setSelectedId(doa.id)}
-              className="w-full text-left bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all active:scale-[0.98]"
-            >
-              <div className="flex justify-between items-start mb-1">
-                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-2 py-0.5 bg-emerald-50 rounded">
-                  {doa.grup}
-                </span>
-                <span className="text-[10px] text-slate-300 font-mono">#{doa.id}</span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 leading-tight">{doa.nama}</h3>
-              <p className="text-sm text-slate-500 mt-2 line-clamp-1 italic">
-                {doa.idn}
-              </p>
-            </button>
-          ))
+          <div className="space-y-3">
+            {filteredDoa.map((doa) => (
+              <button
+                key={doa.id}
+                onClick={() => setSelectedId(doa.id)}
+                className="w-full text-left bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all active:scale-[0.97]"
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-2 py-0.5 bg-emerald-50 rounded">
+                    {doa.grup}
+                  </span>
+                  <span className="text-[10px] text-slate-300 font-mono">#{doa.id}</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 leading-tight">{doa.nama}</h3>
+                <p className="text-sm text-slate-500 mt-2 line-clamp-1 italic">
+                  {doa.idn}
+                </p>
+              </button>
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-20 text-slate-400">
+          <div className="text-center py-20 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200 mt-4">
             <Book className="w-16 h-16 mx-auto mb-4 opacity-10" />
             <p className="font-medium">Doa tidak ditemukan</p>
             <p className="text-xs">Coba kata kunci lain seperti "malam" atau "sholat"</p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

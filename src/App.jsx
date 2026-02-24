@@ -4,7 +4,7 @@ import { Home, Book, BookOpen } from 'lucide-react';
 // Import komponen-komponen yang sudah dipisah
 import HomeView from './pages/Home';
 import DoaView from './pages/Doa';
-import { SuratListView, SuratDetailView } from './pages/Surat';
+import SuratView from './pages/Surat';
 
 // --- Custom Hooks ---
 const useSavedLocation = () => {
@@ -42,12 +42,9 @@ export default function App() {
         )}
         {currentTab === 'doa' && <DoaView />}
         
-        {currentTab === 'surat' && !selectedSurat && (
-          <SuratListView onSelectSurat={setSelectedSurat} />
-        )}
-        {currentTab === 'surat' && selectedSurat && (
-          <SuratDetailView nomor={selectedSurat} onBack={() => setSelectedSurat(null)} />
-        )}
+        {currentTab === 'surat' && (
+  <SuratView />
+)}
       </div>
 
       {/* Bottom Navigation */}
