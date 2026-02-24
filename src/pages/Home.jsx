@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { MapPin, Calendar as CalendarIcon, Moon, Sun, Loader2, AlertCircle, Edit2, X } from 'lucide-react';
-
+import { Helmet } from 'react-helmet';
 const PRAYER_NAMES = ['Imsak', 'Subuh', 'Terbit', 'Dhuha', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
 const IFTAR_PRAYER = 'Maghrib';
 const RAMADHAN_START_DATE = new Date(2026, 1, 18);
@@ -161,6 +161,13 @@ const formattedDate = today.toLocaleDateString("id-ID", {
 
   return (
     <div className="flex flex-col">
+       <Helmet defer={false}>
+        <title>Ayatku - Jadwal Sholat, Al-Qur'an & Doa Harian</title>
+        <meta name="description" content={`Jadwal Imsakiyah dan waktu sholat akurat untuk wilayah ${location.kabkota}. Pantau hitung mundur waktu buka puasa dan sahur di Ayatku.`} />
+        <meta property="og:title" content="Ayatku" />
+        <meta property="og:description" content="Dilengkapi dengan 114 surat Al-Qur'an, kumpulan doa harian, dan pencarian tafsir." />
+        <link rel="canonical" href="https://ayatku.netlify.app/" />
+      </Helmet>
       <div className="bg-gradient-to-br from-emerald-600 to-teal-800 text-white rounded-b-3xl pt-8 pb-6 px-6 shadow-lg z-10">
         <div className="flex items-center justify-between mb-6">
           <button 

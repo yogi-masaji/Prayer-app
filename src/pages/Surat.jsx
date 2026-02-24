@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Tambahkan ini
 import { Search, Loader2, Play, Pause, ArrowLeft, BookOpen, Music, ChevronRight, ChevronLeft } from 'lucide-react';
@@ -100,7 +101,15 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
 
   return (
     <div className="animate-in fade-in slide-in-from-right duration-300 pb-32">
-      {/* Header Detail Sticky */}
+      {surat && (
+        <Helmet defer={false}>
+          <title>{`Surat ${surat.namaLatin} | Baca Al-Qur'an Online`}</title>
+          <meta name="description" content={`Baca Surat ${surat.namaLatin} (${surat.arti}) dengan terjemahan bahasa Indonesia, audio mp3, dan tafsir lengkap.`} />
+          <meta property="og:title" content={`Surat ${surat.namaLatin} - Ayatku`} />
+          <meta property="og:description" content={`Dengarkan audio dan baca terjemahan Surat ${surat.namaLatin} di Ayatku.`} />
+          <link rel="canonical" href={`https://ayatku.netlify.app/surat/${nomor}`} />
+        </Helmet>
+      )}
       <div className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
         <div className="px-4 py-4 flex items-center justify-between">
             <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">

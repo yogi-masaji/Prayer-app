@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Search, Loader2, Sparkles, History, MessageSquare, Quote, ArrowRight, ArrowLeft, BookOpen, Info, Play, Pause, ExternalLink } from 'lucide-react';
-
+import { Helmet } from 'react-helmet';
 // --- Komponen Detail Tampilan Penuh ---
 const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
   const { tipe, data } = item;
@@ -9,7 +9,7 @@ const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
   const [loadingExtra, setLoadingExtra] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
-
+  const seoTitle = tipe === 'doa' ? data.judul : (tipe === 'surat' ? data.nama : `${data.nama_surat} Ayat ${data.nomor_ayat}`);
   useEffect(() => {
     // Sinkronisasi dengan API v2 untuk mendapatkan audio dan teks yang lebih lengkap
     if ((tipe === 'tafsir' || tipe === 'ayat') && data.id_surat) {
@@ -46,6 +46,10 @@ const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
 
   return (
     <div className="animate-in fade-in slide-in-from-right duration-300 pb-24 bg-slate-50 min-h-screen">
+      <Helmet defer={false}>
+        <title>{`Tafsir ${seoTitle} | Ayatku`}</title>
+        <meta name="description" content={`Pelajari tafsir dan makna dari ${seoTitle}. Teks Arab, Latin, dan terjemahan lengkap.`} />
+      </Helmet>
       <div className="bg-white/80 backdrop-blur-md sticky top-0 z-50 px-4 py-4 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Book, BookOpen, SearchIcon } from 'lucide-react';
-
+import { Helmet } from 'react-helmet';
 import HomeView from './pages/Home';
 import DoaView from './pages/Doa';
 import SuratView from './pages/Surat';
@@ -33,7 +33,12 @@ export default function App() {
 
   return (
     <div className="max-w-md mx-auto h-[100dvh] bg-slate-50 flex flex-col font-sans shadow-2xl relative sm:border-x sm:border-slate-200 overflow-hidden">
-      
+        <Helmet defer={false}>
+      <title>Ayatku - Al-Qur'an, Doa & Jadwal Sholat</title>
+      <meta name="description" content="Aplikasi Muslim lengkap dengan Al-Qur'an 30 Juz, jadwal sholat akurat, kumpulan doa harian, dan pencarian tafsir berbasis AI." />
+      <meta property="og:type" content="website" />
+      <meta property="og:image" content="https://ayatku.netlify.app/ayatku.png" />
+    </Helmet>
       <div className="flex-1 overflow-y-auto pb-20 custom-scrollbar relative">
         <Routes>
           <Route path="/" element={isLoaded && <HomeView location={location} saveLocation={saveLocation} />} />

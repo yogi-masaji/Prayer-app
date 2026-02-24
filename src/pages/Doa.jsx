@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Tambahkan ini
 import { Search, Book, Loader2, ArrowLeft, Info, Quote } from 'lucide-react';
-
+import { Helmet } from 'react-helmet';
 // --- Sub-Komponen untuk Detail Doa ---
 const DoaDetailView = ({ id, onBack }) => {
   const [doa, setDoa] = useState(null);
@@ -33,6 +33,14 @@ const DoaDetailView = ({ id, onBack }) => {
 
   return (
     <div className="animate-in fade-in slide-in-from-right duration-300">
+        {doa && (
+        <Helmet defer={false}>
+          <title>{`${doa.nama} - Kumpulan Doa Harian | Ayatku`}</title>
+          <meta name="description" content={`Baca ${doa.nama}. ${doa.idn.substring(0, 150)}...`} />
+          <meta property="og:title" content={`${doa.nama} | Ayatku`} />
+          <link rel="canonical" href={`https://ayatku.netlify.app/doa/${id}`} />
+        </Helmet>
+      )}
       <button 
         onClick={onBack}
         className="flex items-center text-emerald-700 font-medium mb-6 hover:text-emerald-800"
