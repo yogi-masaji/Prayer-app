@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Tambahkan ini
 import { Search, Book, Loader2, ArrowLeft, Info, Quote } from 'lucide-react';
 
 // --- Sub-Komponen untuk Detail Doa ---
@@ -79,10 +80,11 @@ const DoaDetailView = ({ id, onBack }) => {
 
 // --- Komponen Utama ---
 export default function DoaView() {
+  const { id } = useParams(); // Mengambil ID dari URL (/doa/:id)
+  const navigate = useNavigate();
   const [doaList, setDoaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     const fetchDoa = async () => {
@@ -109,17 +111,20 @@ export default function DoaView() {
     });
   }, [doaList, searchQuery]);
 
-  if (selectedId) {
+  // Handler Navigasi
+  const handleSelectDoa = (doaId) => navigate(`/doa/${doaId}`);
+  const handleBack = () => navigate('/doa');
+
+  if (id) {
     return (
       <div className="p-4 pb-24 bg-slate-50 min-h-screen">
-        <DoaDetailView id={selectedId} onBack={() => setSelectedId(null)} />
+        <DoaDetailView id={id} onBack={handleBack} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* HEADER & SEARCH BAR - Tetap di atas saat scroll */}
       <header className="sticky top-0 z-50 bg-slate-50">
         <div className="bg-emerald-600 pt-8 pb-10 px-5 shadow-lg rounded-b-[2.5rem]">
           <h2 className="text-white text-2xl font-bold mb-4">Kumpulan Doa</h2>
@@ -136,7 +141,6 @@ export default function DoaView() {
         </div>
       </header>
 
-      {/* LIST CONTENT - Scrollable area */}
       <main className="flex-1 p-4 -mt-4 pb-24">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
@@ -148,7 +152,7 @@ export default function DoaView() {
             {filteredDoa.map((doa) => (
               <button
                 key={doa.id}
-                onClick={() => setSelectedId(doa.id)}
+                onClick={() => handleSelectDoa(doa.id)}
                 className="w-full text-left bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all active:scale-[0.97]"
               >
                 <div className="flex justify-between items-start mb-1">

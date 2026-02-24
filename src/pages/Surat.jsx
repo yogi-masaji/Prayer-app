@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Tambahkan ini
 import { Search, Loader2, Play, Pause, ArrowLeft, BookOpen, Music, ChevronRight, ChevronLeft } from 'lucide-react';
 
 // --- Sub-Komponen Detail Surat ---
@@ -213,25 +214,12 @@ const SuratDetailView = ({ nomor, onBack, onNavigate }) => {
 
 // --- Komponen Utama ---
 export default function SuratView() {
+  const { nomor } = useParams(); // Mengambil :nomor dari URL
+  const navigate = useNavigate();
   const [suratList, setSuratList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedNomor, setSelectedNomor] = useState(null);
     
-  useEffect(() => {
-    const checkOpenSurat = () => {
-      const openId = localStorage.getItem('open_surat_id');
-      if (openId) {
-        setSelectedNomor(parseInt(openId));
-        localStorage.removeItem('open_surat_id'); 
-      }
-    };
-
-    checkOpenSurat();
-    window.addEventListener('storage', checkOpenSurat);
-    return () => window.removeEventListener('storage', checkOpenSurat);
-  }, []);
-
   useEffect(() => {
     const fetchSurat = async () => {
       try {
@@ -256,13 +244,17 @@ export default function SuratView() {
     );
   }, [suratList, searchQuery]);
 
-  if (selectedNomor) {
+  // Handler Navigasi
+  const handleSelectSurat = (n) => navigate(`/surat/${n}`);
+  const handleBack = () => navigate('/surat');
+
+  if (nomor) {
     return (
       <div className="min-h-screen bg-slate-50">
         <SuratDetailView 
-          nomor={selectedNomor} 
-          onBack={() => setSelectedNomor(null)} 
-          onNavigate={setSelectedNomor} 
+          nomor={nomor} 
+          onBack={handleBack} 
+          onNavigate={handleSelectSurat} 
         />
       </div>
     );
@@ -297,7 +289,7 @@ export default function SuratView() {
             {filteredSurat.map((s) => (
               <button
                 key={s.nomor}
-                onClick={() => setSelectedNomor(s.nomor)}
+                onClick={() => handleSelectSurat(s.nomor)}
                 className="w-full text-left bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all active:scale-[0.97] flex items-center gap-4"
               >
                 <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-700 font-bold border border-emerald-100 flex-shrink-0">

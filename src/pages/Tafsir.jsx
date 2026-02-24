@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Search, Loader2, Sparkles, History, MessageSquare, Quote, ArrowRight, ArrowLeft, BookOpen, Info, Play, Pause, ExternalLink } from 'lucide-react';
 
 // --- Komponen Detail Tampilan Penuh ---
@@ -10,6 +11,7 @@ const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    // Sinkronisasi dengan API v2 untuk mendapatkan audio dan teks yang lebih lengkap
     if ((tipe === 'tafsir' || tipe === 'ayat') && data.id_surat) {
       const fetchAyatDetail = async () => {
         setLoadingExtra(true);
@@ -85,7 +87,6 @@ const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
             {tipe === 'surat' && (
               <div className="flex items-center justify-between mt-2">
                 <p className="text-emerald-600 font-medium">{data.arti}</p>
-                {/* Tombol Navigasi ke Halaman Surat */}
                 <button 
                   onClick={() => onNavigateToSurat(data.id_surat)}
                   className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-200 active:scale-95 transition-all"
@@ -155,17 +156,33 @@ const FullDetailView = ({ item, onBack, onNavigateToSurat }) => {
   );
 };
 
-export default function TafsirView({ onNavigateToSurat }) {
+export default function TafsirView() {
+  const { id } = useParams(); 
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
 
+  // Load History
   useEffect(() => {
     const saved = localStorage.getItem('tafsir_history');
     if (saved) setHistory(JSON.parse(saved));
   }, []);
+
+  // Handle Deep Linking (Jika ada ID di URL, cari di results)
+  useEffect(() => {
+    if (id && results.length > 0) {
+      const found = results.find(r => 
+        (r.data.id_surat?.toString() === id) || 
+        (r.data.id_doa?.toString() === id)
+      );
+      if (found) setSelectedDetail(found);
+    } else if (!id) {
+      setSelectedDetail(null);
+    }
+  }, [id, results]);
 
   const handleSearch = async (e, forcedQuery) => {
     if (e) e.preventDefault();
@@ -198,12 +215,25 @@ export default function TafsirView({ onNavigateToSurat }) {
     }
   };
 
+  const handleNavigateToSurat = (nomor) => navigate(`/surat/${nomor}`);
+  
+  const handleSelectResult = (item) => {
+    const itemId = item.data.id_surat || item.data.id_doa;
+    navigate(`/tafsir/${itemId}`);
+    setSelectedDetail(item);
+  };
+
+  const handleBack = () => {
+    navigate('/tafsir');
+    setSelectedDetail(null);
+  };
+
   if (selectedDetail) {
     return (
       <FullDetailView 
         item={selectedDetail} 
-        onBack={() => setSelectedDetail(null)} 
-        onNavigateToSurat={onNavigateToSurat}
+        onBack={handleBack} 
+        onNavigateToSurat={handleNavigateToSurat}
       />
     );
   }
@@ -261,7 +291,7 @@ export default function TafsirView({ onNavigateToSurat }) {
               <ResultCard 
                 key={idx} 
                 item={item} 
-                onSelect={() => setSelectedDetail(item)} 
+                onSelect={() => handleSelectResult(item)} 
               />
             ))}
           </div>
