@@ -214,7 +214,7 @@ export default function TafsirView({ onNavigateToSurat }) {
         <div className="bg-emerald-600 pt-8 pb-10 px-5 shadow-lg rounded-b-[2.5rem]">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-emerald-200 fill-emerald-200" />
-            <h2 className="text-white text-2xl font-bold">Pencarian AI</h2>
+            <h2 className="text-white text-2xl font-bold">Pencarian Tafsir</h2>
           </div>
           <form onSubmit={handleSearch} className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
